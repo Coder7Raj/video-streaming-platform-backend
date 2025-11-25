@@ -3,11 +3,14 @@ const router = express.Router();
 const path = require("path");
 const fs = require("fs");
 const multer = require("multer");
+const { protect } = require("../middleware/authMiddleware");
+
 const {
   uploadVideo,
   deleteVideo,
   getVideos,
   searchVideos,
+  updateVideo,
 } = require("../controllers/videoController");
 
 // Ensure uploads folder exists
@@ -28,12 +31,15 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Upload route: handle single file ("video") or URL
-router.post("/", upload.single("video"), uploadVideo);
+// Upload route
+// router.post("/", upload.single("video"), uploadVideo);
+
+router.post("/", protect, upload.single("video"), uploadVideo);
 
 // Other video routes
 router.get("/", getVideos);
 router.get("/search", searchVideos);
+router.put("/:id", updateVideo);
 router.delete("/:id", deleteVideo);
 
 module.exports = router;

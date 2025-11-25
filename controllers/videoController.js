@@ -2,23 +2,18 @@ const Video = require("../models/Video");
 
 exports.uploadVideo = async (req, res) => {
   try {
-    const { user, title, description, tags, transcript, url } = req.body;
+    const { title, description, tags, transcript, url } = req.body;
 
     let filePath = null;
-    if (req.file) {
-      // Save relative path for frontend playback
-      filePath = `/uploads/${req.file.filename}`;
-    }
+    if (req.file) filePath = `/uploads/${req.file.filename}`;
 
-    // Require at least one: URL or uploaded file
-    if (!url && !filePath) {
+    if (!url && !filePath)
       return res
         .status(400)
         .json({ error: "Please provide a video URL or upload a file." });
-    }
 
     const video = new Video({
-      user,
+      user: req.user._id, // ✅ use logged-in user from JWT
       title,
       description,
       tags: tags ? tags.split(",") : [],
@@ -35,6 +30,15 @@ exports.uploadVideo = async (req, res) => {
   }
 };
 
+exports.getVideos = async (req, res) => {
+  try {
+    const videos = await Video.find().sort({ createdAt: 1 }); // oldest first
+    res.json(videos);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
 exports.deleteVideo = async (req, res) => {
   try {
     const { id } = req.params;
@@ -44,11 +48,23 @@ exports.deleteVideo = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
-
-exports.getVideos = async (req, res) => {
+exports.updateVideo = async (req, res) => {
   try {
-    const videos = await Video.find().sort({ createdAt: 1 }); // oldest first
-    res.json(videos);
+    const { id } = req.params;
+    const { title, description, tags, transcript } = req.body;
+
+    const updatedVideo = await Video.findByIdAndUpdate(
+      id,
+      {
+        title,
+        description,
+        tags: Array.isArray(tags) ? tags : tags?.split(",") || [],
+        transcript,
+      },
+      { new: true }
+    );
+
+    res.json(updatedVideo);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
