@@ -6,7 +6,8 @@ const videoSchema = new mongoose.Schema({
   description: { type: String },
   tags: [String],
   transcript: { type: String },
-  url: { type: String, required: true },
+  url: { type: String }, // For URL uploads
+  filePath: { type: String }, // For local file uploads
   createdAt: { type: Date, default: Date.now },
 });
 
