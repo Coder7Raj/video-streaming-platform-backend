@@ -3,12 +3,14 @@ const Video = require("../models/Video");
 exports.uploadVideo = async (req, res) => {
   try {
     const { user, title, description, tags, transcript, url } = req.body;
-    let filePath = null;
 
+    let filePath = null;
     if (req.file) {
-      filePath = `/uploads/${req.file.filename}`; // Save the path to DB
+      // Save relative path for frontend playback
+      filePath = `/uploads/${req.file.filename}`;
     }
 
+    // Require at least one: URL or uploaded file
     if (!url && !filePath) {
       return res
         .status(400)
@@ -19,7 +21,7 @@ exports.uploadVideo = async (req, res) => {
       user,
       title,
       description,
-      tags,
+      tags: tags ? tags.split(",") : [],
       transcript,
       url: url || null,
       filePath,
@@ -28,6 +30,7 @@ exports.uploadVideo = async (req, res) => {
     await video.save();
     res.status(201).json(video);
   } catch (err) {
+    console.error(err);
     res.status(400).json({ error: err.message });
   }
 };
@@ -44,14 +47,13 @@ exports.deleteVideo = async (req, res) => {
 
 exports.getVideos = async (req, res) => {
   try {
-    const videos = await Video.find().sort({ createdAt: -1 });
+    const videos = await Video.find().sort({ createdAt: 1 }); // oldest first
     res.json(videos);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 };
 
-// Search functionality like YouTube
 exports.searchVideos = async (req, res) => {
   try {
     const { query } = req.query;
