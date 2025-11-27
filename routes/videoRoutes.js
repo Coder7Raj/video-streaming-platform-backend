@@ -31,12 +31,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Upload route
-// router.post("/", upload.single("video"), uploadVideo);
-
 router.post("/", protect, upload.single("video"), uploadVideo);
-
-// Other video routes
 router.get("/", getVideos);
 router.get("/search", searchVideos);
 router.put("/:id", updateVideo);

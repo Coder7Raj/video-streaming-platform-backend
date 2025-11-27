@@ -13,7 +13,7 @@ exports.uploadVideo = async (req, res) => {
         .json({ error: "Please provide a video URL or upload a file." });
 
     const video = new Video({
-      user: req.user._id, // ✅ use logged-in user from JWT
+      user: req.user._id,
       title,
       description,
       tags: tags ? tags.split(",") : [],
@@ -32,7 +32,7 @@ exports.uploadVideo = async (req, res) => {
 
 exports.getVideos = async (req, res) => {
   try {
-    const videos = await Video.find().sort({ createdAt: 1 }); // oldest first
+    const videos = await Video.find().sort({ createdAt: 1 });
     res.json(videos);
   } catch (err) {
     res.status(400).json({ error: err.message });
